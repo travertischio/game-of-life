@@ -28,11 +28,16 @@ func Create(width, height int) *World {
 		cells:  c,
 	}
 
-	w.cells[4][5] = true
-	w.cells[4][4] = true
-	w.cells[4][3] = true
-
 	return w
+}
+
+// Update updates the world state from which cell to flip
+func (w *World) Update(x, y int) {
+	if w.cells[y][x] {
+		w.cells[y][x] = false
+	} else {
+		w.cells[y][x] = true
+	}
 }
 
 // Turn executes a turn on the world state
@@ -46,6 +51,29 @@ func (w *World) Turn() {
 	}
 
 	w.cells = newWorld.cells
+}
+
+// Draw draws the world to a world image
+func (w *World) Draw(worldImage *ebiten.Image) {
+	worldImage.Fill(color.White)
+	cellImage := ebiten.NewImage(1, 1)
+	cellImage.Fill(color.Black)
+
+	for j := 0; j < w.Height; j++ {
+		for i := 0; i < w.Width; i++ {
+			x := i
+			y := j
+
+			op := &ebiten.DrawImageOptions{}
+			op.GeoM.Translate(float64(x), float64(y))
+			op.ColorM.ScaleWithColor(otherColor)
+
+			if w.cells[y][x] {
+				worldImage.DrawImage(cellImage, op)
+			}
+
+		}
+	}
 }
 
 // liveOrDie returns if a given cell should live or dir based on the current world
@@ -77,27 +105,4 @@ func (w *World) liveOrDie(y, x int) bool {
 	}
 
 	return false
-}
-
-// Draw draws the world to a world image
-func (w *World) Draw(worldImage *ebiten.Image) {
-	worldImage.Fill(color.White)
-	cellImage := ebiten.NewImage(1, 1)
-	cellImage.Fill(color.Black)
-
-	for j := 0; j < w.Height; j++ {
-		for i := 0; i < w.Width; i++ {
-			x := i
-			y := j
-
-			op := &ebiten.DrawImageOptions{}
-			op.GeoM.Translate(float64(x), float64(y))
-			op.ColorM.ScaleWithColor(otherColor)
-
-			if w.cells[y][x] {
-				worldImage.DrawImage(cellImage, op)
-			}
-
-		}
-	}
 }
